@@ -65,7 +65,9 @@ namespace Application.Views
 
         private void DeleteTask(object sender, RoutedEventArgs e)
         {
-            
+            if (!DeleteTaskCommand.CanExecute(this))
+                return;
+            DeleteTaskCommand.Execute(this);
         }
     }
 }

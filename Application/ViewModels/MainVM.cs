@@ -53,6 +53,8 @@ namespace Application.ViewModels
             taskPage.Close();
 
 
+            newTaskView.ID = MainModel.DataBase.Insert(newTaskView);
+
             newTaskView.DeleteTaskCommand = new DelegateCommand(x =>
             {
                 return true;
@@ -64,11 +66,9 @@ namespace Application.ViewModels
                 MainModel.DataBase.DeleteTask(taskView);
             });
 
-
             int index = (_currentPage.Content as StackPanel).Children.Add(newTaskView);
             ((_currentPage.Content as StackPanel).Children[index] as TaskView).Position = index;
 
-            newTaskView.Position = MainModel.DataBase.Insert(newTaskView);
         }
 
         public ICommand DeleteTaskCommand
@@ -81,11 +81,17 @@ namespace Application.ViewModels
                 }, x =>
                 {
                     TaskView taskView = x as TaskView;
-
-                    (_currentPage.Content as StackPanel).Children.RemoveAt(taskView.Position);
+                    DeleteTasksFromView(taskView);
                     MainModel.DataBase.DeleteTask(taskView);
                 });
             }
+        }
+
+        private void DeleteTasksFromView(TaskView taskView)
+        {
+            (_currentPage.Content as StackPanel).Children.RemoveAt(taskView.Position);
+            for (int i = 0; i < (_currentPage.Content as StackPanel).Children.Count; i++)
+                ((_currentPage.Content as StackPanel).Children[i] as TaskView).Position = i;
         }
 
         private Page _currentPage = new Page();
