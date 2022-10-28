@@ -1,0 +1,27 @@
+﻿<UserControl x:Class="Application.Views.TaskView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:Application.Views"
+             mc:Ignorable="d"
+             d:DesignHeight="170" d:DesignWidth="600"
+             x:Name="this">
+    <Border CornerRadius="20" Background="#ddd">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="2*"/>
+                <ColumnDefinition Width="2*"/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <CheckBox IsChecked="{Binding ElementName=this, Path=IsCompletedTask}" Grid.Row="0" Margin="20 10 0 10" FontSize="35" Style="{DynamicResource NameCheckStyle}" Content="{Binding ElementName=this, Path=TaskName}" Grid.ColumnSpan="2"></CheckBox>
+            <Label Grid.Row="1" Margin="20" FontSize="15" HorizontalAlignment="Center" Content="{Binding DeadlineText, ElementName=this}"></Label>
+            <Label Grid.Row="1" Grid.Column="1" Margin="20" FontSize="15" HorizontalAlignment="Center" Content="{Binding ElementName=this, Path=Reliable}"></Label>
+            <Button Grid.Column="2" Click="DeleteTask" Margin="35 10 35 35" Content="Delete"></Button>
+        </Grid>
+    </Border>
+</UserControl>
