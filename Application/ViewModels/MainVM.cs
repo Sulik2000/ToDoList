@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System.Linq;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using Application.Models;
@@ -8,6 +9,20 @@ namespace Application.ViewModels
 {
     public class MainVM
     {
+        public ICommand CompleteTaskCommand
+        {
+            get
+            {
+                return new DelegateCommand(x =>
+                {
+                    return true;
+                }, x =>
+                {
+                    TaskView taskView = x as TaskView;
+                    MainModel.DataBase.ChangeStatus(taskView);
+                });
+            }
+        }
         // Add new task
         public ICommand NewTaskCommand
         {
@@ -45,8 +60,7 @@ namespace Application.ViewModels
                 VerticalAlignment = VerticalAlignment.Top,
                 Margin = new Thickness() { Top = 10, Bottom = 10, Left = 10, Right = 10 },
                 TaskName = taskPage.NameTaskText.Text,
-                DeadlineText = taskPage.DateCalendar.SelectedDate.ToString(),
-                Reliable = taskPage.ReliableText.Text
+                DeadlineText = taskPage.DateCalendar.SelectedDate.ToString().Split(' ').First()
             };
 
 
@@ -55,17 +69,8 @@ namespace Application.ViewModels
 
             newTaskView.ID = MainModel.DataBase.Insert(newTaskView);
 
-            newTaskView.DeleteTaskCommand = new DelegateCommand(x =>
-            {
-                return true;
-            }, x =>
-            {
-                TaskView taskView = x as TaskView;
-
-                (_currentPage.Content as StackPanel).Children.RemoveAt(taskView.Position);
-                MainModel.DataBase.DeleteTask(taskView);
-            });
-
+            newTaskView.DeleteTaskCommand = DeleteTaskCommand;
+            newTaskView.CompleteTaskCommand = CompleteTaskCommand;
             int index = (_currentPage.Content as StackPanel).Children.Add(newTaskView);
             ((_currentPage.Content as StackPanel).Children[index] as TaskView).Position = index;
 
@@ -104,7 +109,7 @@ namespace Application.ViewModels
 
         public MainVM()
         {
-            _currentPage.Content = new StackPanel();
+            _currentPage.Content = new StackPanel() { CanVerticallyScroll = true };
             MainModel.DataBase.ParseTasks();
             ParseTasks();
         }
@@ -116,6 +121,7 @@ namespace Application.ViewModels
             foreach (TaskView i in MainModel.DataBase.Tasks)
             {
                 i.DeleteTaskCommand = DeleteTaskCommand;
+                i.CompleteTaskCommand = CompleteTaskCommand;
                 int index = (_currentPage.Content as StackPanel).Children.Add(i);
                 ((_currentPage.Content as StackPanel).Children[index] as TaskView).Position = index;
             }

@@ -18,9 +18,8 @@
                 <ColumnDefinition Width="2*"/>
                 <ColumnDefinition/>
             </Grid.ColumnDefinitions>
-            <CheckBox IsChecked="{Binding ElementName=this, Path=IsCompletedTask}" Grid.Row="0" Margin="20 10 0 10" FontSize="35" Style="{DynamicResource NameCheckStyle}" Content="{Binding ElementName=this, Path=TaskName}" Grid.ColumnSpan="2"></CheckBox>
+            <CheckBox Checked="CheckBox_Checked" Unchecked="CheckBox_Unchecked" IsChecked="{Binding ElementName=this, Path=IsCompletedTask}" Grid.Row="0" Margin="20 10 0 10" FontSize="35" Style="{DynamicResource NameCheckStyle}" Content="{Binding ElementName=this, Path=TaskName}" Grid.ColumnSpan="2"></CheckBox>
             <Label Grid.Row="1" Margin="20" FontSize="15" HorizontalAlignment="Center" Content="{Binding DeadlineText, ElementName=this}"></Label>
-            <Label Grid.Row="1" Grid.Column="1" Margin="20" FontSize="15" HorizontalAlignment="Center" Content="{Binding ElementName=this, Path=Reliable}"></Label>
             <Button Grid.Column="2" Click="DeleteTask" Margin="35 10 35 35" Content="Delete"></Button>
         </Grid>
     </Border>
