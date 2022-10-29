@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -9,6 +10,52 @@ namespace Application.ViewModels
 {
     public class MainVM
     {
+        public ICommand SelectAllTasks
+        {
+            get
+            {
+                return new DelegateCommand(x =>
+                {
+                    return true;
+                }, x =>
+                {
+                    (_currentPage.Content as StackPanel).Children.Clear();
+                    StackPanel newPage = new StackPanel();
+                    allTasks.ForEach(x => { 
+                        int index = newPage.Children.Add(x);
+                        (newPage.Children[index] as TaskView).Position = index;
+                    });
+                    _currentPage.Content = newPage;
+                    _currentTasks = Tasks.All;
+                });
+            }
+        }
+
+        public ICommand SelectCompletedTasks
+        {
+            get
+            {
+                return new DelegateCommand(x =>
+                {
+                    return true;
+                    //return _currentTasks != Tasks.Completed;
+                }, x =>
+                {
+                    (_currentPage.Content as StackPanel).Children.Clear();
+                    StackPanel newPage = new StackPanel();
+                    completedTasks.ForEach(x =>
+                    {
+                        int index = newPage.Children.Add(x);
+                        (newPage.Children[index] as TaskView).Position = index;
+                    });
+                    _currentPage.Content = newPage;
+                    _currentTasks = Tasks.Completed;
+                });
+            }
+        }
+
+        private Tasks _currentTasks;
+
         public ICommand CompleteTaskCommand
         {
             get
@@ -20,6 +67,12 @@ namespace Application.ViewModels
                 {
                     TaskView taskView = x as TaskView;
                     MainModel.DataBase.ChangeStatus(taskView);
+                    if (taskView.IsCompletedTask)
+                    {
+                        completedTasks.Add(taskView);
+                        return;
+                    }
+                    completedTasks.Remove(taskView);
                 });
             }
         }
@@ -63,6 +116,8 @@ namespace Application.ViewModels
                 DeadlineText = taskPage.DateCalendar.SelectedDate.ToString().Split(' ').First()
             };
 
+            allTasks.Add(newTaskView);
+
 
             taskPage.Close();
 
@@ -95,11 +150,17 @@ namespace Application.ViewModels
         private void DeleteTasksFromView(TaskView taskView)
         {
             (_currentPage.Content as StackPanel).Children.RemoveAt(taskView.Position);
+            if (taskView.IsCompletedTask)
+                completedTasks.Remove(completedTasks.Where(x => { return x == taskView; }).First());
+            allTasks.Remove(allTasks.Where(x => { return x == taskView; }).First());
             for (int i = 0; i < (_currentPage.Content as StackPanel).Children.Count; i++)
                 ((_currentPage.Content as StackPanel).Children[i] as TaskView).Position = i;
         }
 
         private Page _currentPage = new Page();
+
+        private List<TaskView> completedTasks = new List<TaskView>();
+        private List<TaskView> allTasks = new List<TaskView>();
 
         public Page CurrentPage
         {
@@ -109,9 +170,15 @@ namespace Application.ViewModels
 
         public MainVM()
         {
-            _currentPage.Content = new StackPanel() { CanVerticallyScroll = true };
             MainModel.DataBase.ParseTasks();
             ParseTasks();
+            StackPanel content = new StackPanel();
+            allTasks.ForEach(x => { 
+                int index = content.Children.Add(x);
+                (content.Children[index] as TaskView).Position = index;
+            });
+            _currentPage.Content = content;
+            _currentTasks = Tasks.All;
         }
         /// <summary>
         /// This function parses tasks from database in View
@@ -122,8 +189,10 @@ namespace Application.ViewModels
             {
                 i.DeleteTaskCommand = DeleteTaskCommand;
                 i.CompleteTaskCommand = CompleteTaskCommand;
-                int index = (_currentPage.Content as StackPanel).Children.Add(i);
-                ((_currentPage.Content as StackPanel).Children[index] as TaskView).Position = index;
+                if (i.IsCompletedTask)
+                    completedTasks.Add(i);
+
+                allTasks.Add(i);
             }
         }
     }
